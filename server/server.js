@@ -13,7 +13,7 @@ var app = express();
 //configure middleware
 app.use(bodyParser.json());
 
-//set up route
+//set up routes
 app.post('/todos', (req, res) => {
     var todo = new Todo({
         text: req.body.text
@@ -23,8 +23,16 @@ app.post('/todos', (req, res) => {
         res.send(doc);
     }, (e) => {
         res.status(400).send(e);
-    })
-})
+    });
+});
+
+app.get('/todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.send({todos});
+    }, (err) => {
+        res.status(400).send(err);
+    });
+});
 
 
 app.listen(3000, () => {
