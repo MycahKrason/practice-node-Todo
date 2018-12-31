@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 
 //user a schema so we can add on customer methods
@@ -35,6 +36,7 @@ var userSchema = new mongoose.Schema({
 });
 
 //We need to bind 'this', so don't use an arrow function
+//Instance Methods
 userSchema.methods.toJSON = function(){
     var user = this;
     var userObject = user.toObject();
@@ -53,6 +55,39 @@ userSchema.methods.generateAuthToken = function(){
         return token;
     });
 };
+
+//Model Methods
+userSchema.statics.findByToken = function(token){
+    var User = this;
+    var decoded;
+    
+    try{
+        decoded = jwt.verify(token, 'randomsecret');
+    }catch(e){
+        return Promise.reject();
+    }
+    
+    return User.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    });
+};
+
+userSchema.pre('save', function(next){
+    var user = this;
+        
+    if(user.isModified('password')){
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                next();
+            });
+        });
+    }else{
+        next();
+    }
+});
 
 //Create a user model
 var User = mongoose.model('User', userSchema);
