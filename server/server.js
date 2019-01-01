@@ -130,7 +130,7 @@ app.post('/users', (req, res) => {
 });
 
 
-//Test route 
+//get user 
 app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user);
 });
