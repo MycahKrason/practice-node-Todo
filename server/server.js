@@ -1,4 +1,4 @@
-require('../config/config')
+require('./config/config')
 
 //Library Imports
 const _ = require('lodash');
